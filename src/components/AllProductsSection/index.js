@@ -75,11 +75,11 @@ const apiStatusConstants = {
 class AllProductsSection extends Component {
   state = {
     productsList: [],
+    apiStatus: apiStatusConstants.initial,
     activeOptionId: sortbyOptions[0].optionId,
     searchInput: '',
     activeCategoryId: '',
     activeRatingId: '',
-    isLoading: false,
     errorMsg: false,
   }
 
@@ -89,7 +89,7 @@ class AllProductsSection extends Component {
 
   getProducts = async () => {
     this.setState({
-      isLoading: true,
+      apiStatus: apiStatusConstants.inProgress,
     })
     const jwtToken = Cookies.get('jwt_token')
     const {activeOptionId, activeCategoryId, searchInput, activeRatingId} =
@@ -114,8 +114,8 @@ class AllProductsSection extends Component {
       }))
       this.setState({
         productsList: updatedData,
-        // apiStatus: apiStatusConstants.success,
-        isLoading: false,
+        apiStatus: apiStatusConstants.success,
+        
       })
     } else {
       this.setState({
@@ -217,9 +217,24 @@ class AllProductsSection extends Component {
       </p>
     </div>
   )
+  /* switch statement FOR 3 CASES*/
+   renderAllProducts = () => {
+    const {apiStatus} = this.state
+
+    switch (apiStatus) {
+      case apiStatusConstants.success:
+        return this.renderProductsList()
+      case apiStatusConstants.failure:
+        return this.renderFailureView()
+      case apiStatusConstants.inProgress:
+        return this.renderLoader()
+      default:
+        return null
+    }
+  }
 
   render() {
-    const {isLoading, activeRatingId, activeCategoryId, searchInput} =
+    const {activeRatingId, activeCategoryId, searchInput} =
       this.state
 
     return (
@@ -237,7 +252,7 @@ class AllProductsSection extends Component {
           changeRating={this.changeRating}
           clearFilter={this.clearFilter}
         />
-        {isLoading ? this.renderLoader() : this.renderProductsList()}
+       {this.renderAllProducts()}
       </div>
     )
   }
